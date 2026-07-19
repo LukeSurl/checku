@@ -1,2 +1,0 @@
-# checku
-The Checku game
