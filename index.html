@@ -1644,12 +1644,14 @@
 <!-- Welcome modal (first visit) -->
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-modal" role="dialog" aria-modal="true" aria-label="Welcome to Checku">
+    <div class="welcome-title"><span class="welcome-to">Welcome to</span><span class="logo-word welcome-logo">checku</span></div>
     <p class="welcome-tag">A logic puzzle where chess meets sudoku</p>
     <p class="welcome-sub">Fill the board so every row and column holds the same set of pieces, and no king is in check</p>
     <div class="welcome-btns">
       <button class="welcome-btn primary" onclick="welcomeChoose('tutorial')">Guided tutorial</button>
       <button class="welcome-btn" onclick="welcomeChoose('rules')">How to play</button>
-      <button class="welcome-btn" onclick="welcomeChoose('play')">Jump straight in</button>
+      <button class="welcome-btn" id="welcomeDailyBtn" onclick="welcomeChoose('daily')">Play today's daily puzzle</button>
+      <button class="welcome-btn" onclick="welcomeChoose('p1')">Play easy puzzle #1</button>
     </div>
   </div>
 </div>
@@ -3087,7 +3089,7 @@ function buildPuzzleSelector() {
   }
 
   // Campaign ramp, grouped by difficulty so players can jump in at their level
-  heading('Puzzles');
+  heading('Puzzle collection');
   for (const lab of ['Easy', 'Medium', 'Hard', 'Very hard']) {
     const entries = [];
     PUZZLES.forEach((p, i) => {
@@ -3121,6 +3123,9 @@ function maybeShowWelcome() {
   let seen = false;
   try { seen = localStorage.getItem('checku_seen_welcome') === '1'; } catch(e) {}
   if (!seen) {
+    // No daily to offer if the queue is exhausted
+    const db = document.getElementById('welcomeDailyBtn');
+    if (db) db.style.display = todayDailyIdx() >= 0 ? '' : 'none';
     document.getElementById('welcomeOverlay').classList.add('open');
     dialogOpened('welcomeOverlay');
   }
@@ -3132,7 +3137,9 @@ function welcomeChoose(choice) {
   if (ov.classList.contains('open')) { ov.classList.remove('open'); dialogClosed(); }
   if (choice === 'rules') openMenu();
   else if (choice === 'tutorial') startTutorial();
-  // 'play': puzzle 1 is already loaded — nothing else to do
+  else if (choice === 'daily' && todayDailyIdx() >= 0) loadPuzzle(todayDailyIdx());
+  else if (choice === 'p1') loadPuzzle(0);
+  // 'play' (e.g. Escape): stay on whatever is already loaded
 }
 
 // ─── GUIDED TUTORIAL ──────────────────────────────────────────────────────────
